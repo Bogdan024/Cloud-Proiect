@@ -1,7 +1,6 @@
 import { sendMethodNotAllowed, sendOk } from "../../../../utils/apiMethods";
+import { COLLECTION_NAME } from "../../../../utils/constants";
 import { getCollection } from "../../../../utils/functions";
-
-const COLLECTION_NAME = "records";
 
 const getRecords = async () => {
     const collection = await getCollection(COLLECTION_NAME);

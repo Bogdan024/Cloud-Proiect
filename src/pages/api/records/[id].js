@@ -10,22 +10,19 @@ const getRecord = async (id) => {
     })
 }
 
-const updateRecord = async(id, body) => {
+const updateRecord = async (id, data) => {
     const collection = await getCollection(COLLECTION_NAME);
     return await collection.updateOne({
-        _id: new ObjectId(id),
-
+        _id: new ObjectId(id)
     },
     {
         $set: data
     })
 }
 
-const deleteRecord = async(id) => {
+const deleteRecord = async (id) => {
     const collection = await getCollection(COLLECTION_NAME);
-    return await collection.deleteOne({
-        _id: new ObjectId(id)
-    }); 
+    return await collection.deleteOne({_id: new ObjectId(id)});
 }
 
 export default async function handler(req, res) {
@@ -47,12 +44,12 @@ export default async function handler(req, res) {
                 result = await deleteRecord(id);
                 break;
             default:
-                return sendMethodNotAllowed(res, "Method not allowed");
+                return sendMethodNotAllowed(res, "Method Not Allowed!")
         }
 
         return sendOk(res, result);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Internal server error", error:error.message});
+        return res.status(500).json({ message: "Internal Server Error", error: error.message})
     }
 }
