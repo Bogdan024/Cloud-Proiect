@@ -1,8 +1,8 @@
 // pages/api/users.js
 import { ObjectId } from "mongodb";
-import { sendMethodNotAllowed, sendOk } from "../../utils/apiMethods";
-import { USERS_COLLECTION } from "../../utils/constants";
-import { getCollection } from "../../utils/functions";
+import { sendMethodNotAllowed, sendOk } from "../../../utils/apiMethods";
+import { USERS_COLLECTION } from "../../../utils/constants";
+import { getCollection } from "../../../utils/functions";
 
 export default async function handler(req, res) {
   const { method, query } = req;
