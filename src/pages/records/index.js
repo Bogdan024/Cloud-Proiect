@@ -1,9 +1,9 @@
-import MainPage from "../../../components/MainPage";
+import AuthComponent from "../../../components/AuthComponent";
 
 
 const index = () => {
     return (
-        <MainPage />        
+        <AuthComponent />        
     )    
 }
 
