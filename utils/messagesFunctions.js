@@ -1,8 +1,10 @@
 import { io } from 'socket.io-client';
 
+
 // utils/messageFunctions.js
 export const getUsers = async () => {
   try {
+    console.log(`${window.location.origin}/api/users`);
     const response = await fetch(`${window.location.origin}/api/users`);
     if (!response.ok) {
       throw new Error('Failed to fetch users');
