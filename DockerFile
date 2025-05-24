@@ -1,20 +1,25 @@
+# 1) Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Install deps & build
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+COPY . .
+RUN yarn build
+
+# 2) Run stage
 FROM node:18-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
-# Copy standalone app + its modules
-COPY --from=builder /app/.next/standalone/package.json ./
-COPY --from=builder /app/.next/standalone/node_modules ./node_modules
-COPY --from=builder /app/.next/standalone/server.js ./server.js
+# Install only production deps
+COPY package.json yarn.lock ./
+RUN yarn install --production --frozen-lockfile
 
-# Static assets
-COPY --from=builder /app/.next/static    ./.next/static
-COPY --from=builder /app/public          ./public
-
-# Drop privileges
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser  --system --uid 1001 nextjs
-USER nextjs
+# Copy the build output and static assets
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["yarn", "start"]
