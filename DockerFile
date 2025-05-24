@@ -1,34 +1,20 @@
-# Dockerfile
-# A simpler approach for dynamic Next.js with API routes
-
-FROM node:18-alpine AS base
-WORKDIR /app
-
-# Install dependencies
-COPY package.json yarn.lock .
-RUN yarn install --frozen-lockfile
-
-# Copy rest of source
-COPY . .
-
-# Build Next.js app
-RUN yarn build
-
-# Production image
 FROM node:18-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV production
 
-# Copy only what's needed
-COPY package.json yarn.lock .
-RUN yarn install --production --frozen-lockfile
+# Copy standalone app + its modules
+COPY --from=builder /app/.next/standalone/package.json ./
+COPY --from=builder /app/.next/standalone/node_modules ./node_modules
+COPY --from=builder /app/.next/standalone/server.js ./server.js
 
-COPY .next .next
-COPY public public
+# Static assets
+COPY --from=builder /app/.next/static    ./.next/static
+COPY --from=builder /app/public          ./public
 
-# Set environment
-ENV NODE_ENV=production
-ENV PORT=3000
+# Drop privileges
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser  --system --uid 1001 nextjs
+USER nextjs
 
 EXPOSE 3000
-
-CMD ["yarn", "start"]
+CMD ["node", "server.js"]
