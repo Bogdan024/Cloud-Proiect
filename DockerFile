@@ -2,22 +2,42 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Install deps & build
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Copy any lockfile you have, and install accordingly
+COPY package.json package-lock.json yarn.lock* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then \
+    yarn install --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then \
+    npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then \
+    yarn global add pnpm && pnpm install --frozen-lockfile; \
+  else \
+    echo "No lockfile found, aborting" && exit 1; \
+  fi
+
+# Copy source and build
 COPY . .
 RUN yarn build
 
-# 2) Run stage
+# 2) Runtime stage
 FROM node:18-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install only production deps
-COPY package.json yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+# Copy only the lockfile(s) again, then install production deps
+COPY package.json package-lock.json yarn.lock* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then \
+    yarn install --production --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then \
+    npm ci --only=production; \
+  elif [ -f pnpm-lock.yaml ]; then \
+    yarn global add pnpm && pnpm install --prod --frozen-lockfile; \
+  else \
+    echo "No lockfile found, aborting" && exit 1; \
+  fi
 
-# Copy the build output and static assets
+# Copy the Next.js build output
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
