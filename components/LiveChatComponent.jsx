@@ -202,7 +202,7 @@ const LiveChatComponent = () => {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <h1>Real-Time Chat</h1>
+        <h1>Chat with your friends</h1>
         <div className="user-info">
           <span>{user.name}</span>
           <button onClick={logout} className="logout-btn">
