@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 // utils/messageFunctions.js
 export const getUsers = async () => {
   try {
-    const response = await fetch('/api/users');
+    const response = await fetch(`${window.location.origin}/api/users`);
     if (!response.ok) {
       throw new Error('Failed to fetch users');
     }
@@ -18,7 +18,7 @@ export const getUsers = async () => {
 // utils/messagesFunctions.js
 export async function getMessages(senderId, receiverId) {
   const res = await fetch(
-    `/api/messages?senderId=${encodeURIComponent(senderId)}&receiverId=${encodeURIComponent(receiverId)}`
+    `${window.location.origin}/api/messages?senderId=${encodeURIComponent(senderId)}&receiverId=${encodeURIComponent(receiverId)}`
   );
   if (!res.ok) {
     throw new Error(`Could not fetch messages: ${res.status}`);
@@ -31,7 +31,7 @@ export async function getMessages(senderId, receiverId) {
 
 export const markMessagesAsRead = async (senderId, receiverId) => {
   try {
-    const response = await fetch('/api/messages', {
+    const response = await fetch(`${window.location.origin}/api/messages`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const markMessagesAsRead = async (senderId, receiverId) => {
 export const loginUser = async (email, password) => {
   try {
     console.log("Sending login request");
-    const response = await fetch('/api/login', {
+    const response = await fetch(`${window.location.origin}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const loginUser = async (email, password) => {
 export const registerUser = async (name, email, password) => {
   try {
     console.log("Sending registration request");
-    const response = await fetch('/api/register', {
+    const response = await fetch(`${window.location.origin}/api/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ let socket = null;
  */
 export async function connectWebSocket() {
   // 1) Hit the API route once to spin up the server:
-  await fetch('/api/socket');
+  await fetch(`${window.location.origin}/api/socket`);
   // 2) Now open a socket.io connection to the same origin:
   socket = io();
   return socket;
