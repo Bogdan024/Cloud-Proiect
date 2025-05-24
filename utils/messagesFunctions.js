@@ -30,6 +30,75 @@ export async function getMessages(senderId, receiverId) {
   return Array.isArray(json.data) ? json.data : json;
 }
 
+export const editMessage = async (messageId, content, userId) => {
+  try {
+    const response = await fetch(`${window.location.origin}/api/${messageId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        content,
+        userId 
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Error response:', errorData);
+      throw new Error(`Failed to edit message: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.data; // Assuming your sendOk function wraps the result in a data property
+  } catch (error) {
+    console.error('Error editing message:', error);
+    throw error;
+  }
+};
+
+export const deleteMessage = async (messageId, userId) => {
+  try {
+    const response = await fetch(`${window.location.origin}/api/${messageId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Error response:', errorData);
+      throw new Error(`Failed to delete message: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.data; // Assuming your sendOk function wraps the result in a data property
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    throw error;
+  }
+};
+
+export const getMessage = async (messageId) => {
+  try {
+    const response = await fetch(`${window.location.origin}/api/${messageId}`);
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Error response:', errorData);
+      throw new Error(`Failed to get message: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.data; // Assuming your sendOk function wraps the result in a data property
+  } catch (error) {
+    console.error('Error getting message:', error);
+    throw error;
+  }
+};
+
 
 export const markMessagesAsRead = async (senderId, receiverId) => {
   try {
@@ -147,4 +216,12 @@ export function sendReadReceipt(socket, senderId, receiverId) {
 
 export function sendTypingIndicator(socket, senderId, receiverId) {
   socket.emit('typing', { senderId, receiverId });
+}
+
+export const notifyMessageEdit = (socket, messageData) => {
+  socket.emit('edit_message', messageData);
+}
+
+export const notifyMessageDelete = (socket, messageData) => {
+  socket.emit('delete_message', messageData);
 }

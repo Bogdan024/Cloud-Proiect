@@ -1,5 +1,6 @@
 // components/LiveChatComponent.js
 import React, { useState, useEffect, useRef } from 'react';
+import MessageActions from './MessageActions';
 import {
   getMessages,
   formatLastSeen,
@@ -21,6 +22,9 @@ const LiveChatComponent = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [selectedMessage, setSelectedMessage] = useState(null);
+
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -100,6 +104,18 @@ const LiveChatComponent = () => {
           }
         });
 
+        socket.on('message_edited', ({ messageId, newContent, updatedAt }) => {
+  setMessages(prev => 
+    prev.map(m => m._id === messageId 
+      ? { ...m, content: newContent, isEdited: true, updatedAt: new Date(updatedAt) } 
+      : m
+    )
+  );
+});
+socket.on('message_deleted', ({ messageId }) => {
+  setMessages(prev => prev.filter(m => m._id !== messageId));
+});
+
         socket.on('typing', ({ senderId }) => {
           const sel = selectedUserRef.current;
           if (sel && senderId === sel._id) {
@@ -128,7 +144,7 @@ const LiveChatComponent = () => {
     };
   }, []);
 
-  // Load messages when selecting a user
+  // Load messages when selecting a user to
   useEffect(() => {
     if (!selectedUser || !user) return;
     selectedUserRef.current = selectedUser;
@@ -294,17 +310,55 @@ const LiveChatComponent = () => {
                       className={`message ${
                         m.senderId === user._id ? 'sent' : 'received'
                       }`}
+                      onDoubleClick={() => setSelectedMessage(m)}
                     >
-                      <div className="message-content">{m.content}</div>
+                      {/* Conditionally render MessageActions */}
+                      {selectedMessage?._id === m._id && (
+                        <MessageActions
+                          message={m}
+                          currentUserId={user._id}
+                          onMessageUpdated={(updatedMessage) => {
+                            setMessages((prev) =>
+                              prev.map((msg) =>
+                                msg._id === updatedMessage._id ? updatedMessage : msg
+                              )
+                            );
+                            setSelectedMessage(null);
+                          }}
+                          onMessageDeleted={(deletedId) => {
+                            setMessages((prev) => prev.filter((msg) => msg._id !== deletedId));
+                            setSelectedMessage(null);
+                          }}
+                        />
+                      )}
+                      <div className="message-content">{m.content} </div>
                       <div className="message-time">
-                        {new Date(m.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                        {m.senderId === user._id && (
-                          <span className={`read-status ${
-                            m.read ? 'read' : 'unread'
-                          }`}>✓✓</span>
+                        {m.isEdited ? (
+    // If the message was edited, show "Edited" and the updated time
+                          <>
+                            Edited {new Date(m.updatedAt || m.timestamp).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                            {m.senderId === user._id && (
+                              <span className={`read-status ${
+                                m.read ? 'read' : 'unread'
+                              }`}>✓✓</span>
+                            )}
+                          </>
+                        ) : (
+                          // If not edited, show the original timestamp
+                          <>
+                            {new Date(m.timestamp).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                            {m.senderId === user._id && (
+                              <span className={`read-status ${
+                                m.read ? 'read' : 'unread'
+                              }`}>✓✓</span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
