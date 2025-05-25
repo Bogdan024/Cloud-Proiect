@@ -1,4 +1,3 @@
-// components/AuthComponent.js
 import React, { useEffect, useState } from 'react';
 import { loginUser, registerUser } from '../utils/messagesFunctions';
 import Spinner from './Spinner';
@@ -50,14 +49,12 @@ const AuthComponent = () => {
         throw new Error('Invalid response from server');
       }
       
-      // Store user data and token
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
       
       console.log("Data stored in localStorage");
       console.log("Redirecting to live chat page");
       
-      // Redirect to live chat page
       window.location.href = '/liveChat';
     } catch (error) {
       console.error("Authentication error:", error);
@@ -65,7 +62,9 @@ const AuthComponent = () => {
     } finally {
       setLoading(false);
     }
+
   };
+  
   return (
     <div className="auth-container">
       <div className="auth-card">

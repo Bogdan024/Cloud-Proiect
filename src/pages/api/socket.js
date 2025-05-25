@@ -1,4 +1,3 @@
-// pages/api/socket.js
 import { Server } from 'socket.io';
 import { verify } from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
@@ -24,11 +23,9 @@ export default function SocketHandler(req, res) {
     
     socket.on('authenticate', async ({ token }) => {
       try {
-        // Verify token
         const decoded = verify(token, JWT_SECRET);
         const usersCollection = await getCollection(USERS_COLLECTION);
-        
-        // Get user
+
         const user = await usersCollection.findOne({ _id: new ObjectId(decoded.id) });
         
         if (!user) {
@@ -36,22 +33,18 @@ export default function SocketHandler(req, res) {
           return;
         }
         
-        // Store user ID in socket for later use
         socket.userId = user._id.toString();
         
-        // Update user status to online
         await usersCollection.updateOne(
           { _id: user._id },
           { $set: { isOnline: true } }
         );
         
-        // Broadcast to all clients that user is online
         socket.broadcast.emit('user_status', {
           userId: user._id.toString(),
           isOnline: true
         });
         
-        // Get all users
         const users = await usersCollection.find({}).toArray();
         const sanitizedUsers = users.map(u => {
           const { password, ...userWithoutPassword } = u;
@@ -61,7 +54,6 @@ export default function SocketHandler(req, res) {
           };
         });
         
-        // Send users list to client
         socket.emit('users', sanitizedUsers);
       } catch (error) {
         console.error('Authentication error:', error);
@@ -78,7 +70,6 @@ export default function SocketHandler(req, res) {
           return;
         }
         
-        // Save message to database
         const messagesCollection = await getCollection(MESSAGES_COLLECTION);
         const message = {
           senderId,
@@ -95,10 +86,8 @@ export default function SocketHandler(req, res) {
           _id: result.insertedId.toString() 
         };
         
-        // Send message to sender as confirmation
         socket.emit('message_sent', { message: newMessage });
         
-        // Find receiver socket and send message
         const receiverSocket = Array.from(io.sockets.sockets.values())
           .find(s => s.userId === receiverId);
         
@@ -120,14 +109,12 @@ export default function SocketHandler(req, res) {
           return;
         }
         
-        // Update messages in database
         const messagesCollection = await getCollection(MESSAGES_COLLECTION);
         await messagesCollection.updateMany(
           { senderId, receiverId, read: false },
           { $set: { read: true } }
         );
         
-        // Find sender socket and notify that messages were read
         const senderSocket = Array.from(io.sockets.sockets.values())
           .find(s => s.userId === senderId);
         
@@ -147,8 +134,8 @@ export default function SocketHandler(req, res) {
         socket.emit('error', { message: 'Invalid typing data' });
         return;
       }
-      
-      // Find receiver socket and notify about typing
+    
+
       const receiverSocket = Array.from(io.sockets.sockets.values())
         .find(s => s.userId === receiverId);
       
@@ -162,12 +149,10 @@ export default function SocketHandler(req, res) {
       
       if (socket.userId) {
         try {
-          // Check if user has other connections
           const hasOtherConnections = Array.from(io.sockets.sockets.values())
             .some(s => s.id !== socket.id && s.userId === socket.userId);
           
           if (!hasOtherConnections) {
-            // Update user status to offline
             const usersCollection = await getCollection(USERS_COLLECTION);
             await usersCollection.updateOne(
               { _id: new ObjectId(socket.userId) },
@@ -179,7 +164,6 @@ export default function SocketHandler(req, res) {
               }
             );
             
-            // Broadcast to all clients that user is offline
             socket.broadcast.emit('user_status', {
               userId: socket.userId,
               isOnline: false

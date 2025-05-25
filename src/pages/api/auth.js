@@ -1,4 +1,3 @@
-// pages/api/auth.js
 import { sendMethodNotAllowed, sendOk } from "../../../utils/apiMethods";
 import { USERS_COLLECTION } from "../../../utils/constants";
 import { getCollection } from "../../../utils/functions";
@@ -10,34 +9,29 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const login = async (email, password) => {
   const collection = await getCollection(USERS_COLLECTION);
   
-  // Find user by email
   const user = await collection.findOne({ email });
   
   if (!user) {
     throw new Error("Invalid credentials");
   }
   
-  // Compare password
   const isMatch = await bcrypt.compare(password, user.password);
   
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
   
-  // Update user status to online
   await collection.updateOne(
     { _id: user._id },
     { $set: { isOnline: true } }
   );
   
-  // Generate JWT token
   const token = jwt.sign(
     { id: user._id, email: user.email },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
   
-  // Don't return password
   const { password: pwd, ...userWithoutPassword } = user;
   
   return { user: userWithoutPassword, token };
@@ -51,7 +45,6 @@ export default async function handler(req, res) {
   }
   
   try {
-    // Validate input
     if (!body.email || !body.password) {
       return res.status(400).json({ message: "Email and password are required" });
     }

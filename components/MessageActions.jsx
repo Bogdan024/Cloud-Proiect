@@ -1,5 +1,3 @@
-// components/MessageActions.jsx
-
 import { useState, useRef, useEffect } from 'react';
 import { editMessage, deleteMessage } from '../utils/messagesFunctions';
 
@@ -13,10 +11,8 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
   const menuRef = useRef(null);
   const editInputRef = useRef(null);
   
-  // Check if this is the user's own message
   const isOwnMessage = message.senderId === currentUserId;
   
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -30,32 +26,27 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
     };
   }, []);
   
-  // Focus the edit input when editing starts
   useEffect(() => {
     if (isEditing && editInputRef.current) {
       editInputRef.current.focus();
     }
   }, [isEditing]);
   
-  // Toggle menu open/closed
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
   
-  // Start editing the message
   const handleEdit = () => {
     setIsEditing(true);
     setIsMenuOpen(false);
   };
   
-  // Cancel editing
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditContent(message.content);
     setError(null);
   };
   
-  // Save edited message
   const handleSaveEdit = async () => {
     if (editContent.trim() === '') {
       setError('Message cannot be empty');
@@ -82,7 +73,6 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
     }
   };
   
-  // Delete message
   const handleDelete = async () => {
     setIsMenuOpen(false);
     
@@ -101,7 +91,6 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
     }
   };
   
-  // If not the user's own message, don't show edit/delete options
   if (!isOwnMessage) {
     return null;
   }

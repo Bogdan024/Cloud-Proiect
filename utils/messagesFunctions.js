@@ -1,7 +1,5 @@
 import { io } from 'socket.io-client';
 
-
-// utils/messageFunctions.js
 export const getUsers = async () => {
   try {
     console.log(`${window.location.origin}/api/users`);
@@ -17,7 +15,6 @@ export const getUsers = async () => {
   }
 };
 
-// utils/messagesFunctions.js
 export async function getMessages(senderId, receiverId) {
   const res = await fetch(
     `${window.location.origin}/api/messages?senderId=${encodeURIComponent(senderId)}&receiverId=${encodeURIComponent(receiverId)}`
@@ -26,7 +23,6 @@ export async function getMessages(senderId, receiverId) {
     throw new Error(`Could not fetch messages: ${res.status}`);
   }
   const json = await res.json();
-  // unwrap your sendOk wrapper (data key), or fallback to raw
   return Array.isArray(json.data) ? json.data : json;
 }
 
@@ -50,7 +46,7 @@ export const editMessage = async (messageId, content, userId) => {
     }
     
     const data = await response.json();
-    return data.data; // Assuming your sendOk function wraps the result in a data property
+    return data.data;
   } catch (error) {
     console.error('Error editing message:', error);
     throw error;
@@ -74,7 +70,7 @@ export const deleteMessage = async (messageId, userId) => {
     }
     
     const data = await response.json();
-    return data.data; // Assuming your sendOk function wraps the result in a data property
+    return data.data;
   } catch (error) {
     console.error('Error deleting message:', error);
     throw error;
@@ -92,7 +88,7 @@ export const getMessage = async (messageId) => {
     }
     
     const data = await response.json();
-    return data.data; // Assuming your sendOk function wraps the result in a data property
+    return data.data;
   } catch (error) {
     console.error('Error getting message:', error);
     throw error;
@@ -190,14 +186,8 @@ export const formatLastSeen = (lastSeen) => {
 
 let socket = null;
 
-/**
- * Bootstraps the Next.js Socket.IO server 
- * then returns a connected socket.io client instance.
- */
 export async function connectWebSocket() {
-  // 1) Hit the API route once to spin up the server:
   await fetch(`${window.location.origin}/api/socket`);
-  // 2) Now open a socket.io connection to the same origin:
   socket = io();
   return socket;
 }

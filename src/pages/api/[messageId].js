@@ -1,4 +1,3 @@
-// pages/api/messages/[messageId].js
 import { ObjectId } from "mongodb";
 import { sendMethodNotAllowed, sendOk } from "../../../utils/apiMethods";
 import { MESSAGES_COLLECTION } from "../../../utils/constants";
@@ -16,7 +15,6 @@ export default async function handler(req, res) {
     const collection = await getCollection(MESSAGES_COLLECTION);
     let result;
     
-    // Create ObjectId from the messageId string
     let objectId;
     try {
       objectId = new ObjectId(messageId);
@@ -24,7 +22,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Invalid message ID format" });
     }
     
-    // Check if message exists
     const message = await collection.findOne({ _id: objectId });
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
@@ -32,7 +29,6 @@ export default async function handler(req, res) {
     
     switch (method) {
       case "GET":
-        // Return the message data
         result = {
           ...message,
           _id: message._id.toString()
@@ -40,17 +36,14 @@ export default async function handler(req, res) {
         break;
         
       case "PUT":
-        // Edit message content
         if (!body.content || body.content.trim() === "") {
           return res.status(400).json({ message: "Message content is required" });
         }
         
-        // Check if user is authorized to edit this message
         if (body.userId !== message.senderId) {
           return res.status(403).json({ message: "You can only edit your own messages" });
         }
         
-        // Update the message
         await collection.updateOne(
           { _id: objectId },
           { 
@@ -62,7 +55,6 @@ export default async function handler(req, res) {
           }
         );
         
-        // Get the updated message
         const updatedMessage = await collection.findOne({ _id: objectId });
         result = {
           ...updatedMessage,
@@ -71,13 +63,10 @@ export default async function handler(req, res) {
         break;
         
       case "DELETE":
-        // Delete message
-        // Check if user is authorized to delete this message
         if (body.userId !== message.senderId) {
           return res.status(403).json({ message: "You can only delete your own messages" });
         }
         
-        // Delete the message
         await collection.deleteOne({ _id: objectId });
         result = { success: true, message: "Message deleted successfully" };
         break;

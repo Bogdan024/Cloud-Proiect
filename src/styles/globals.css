@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-/* Modern Chat Application Styling */
 :root {
-  /* Color Palette */
   --primary: #4f46e5;
   --primary-light: #6366f1;
   --primary-dark: #4338ca;
@@ -946,7 +944,6 @@ input:focus, textarea:focus {
   }
 }
 
-/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-white: #1e1e2d;
@@ -976,7 +973,6 @@ input:focus, textarea:focus {
   }
 }
 
-/* Utility Classes */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
@@ -1000,7 +996,6 @@ input:focus, textarea:focus {
 .rounded-full { border-radius: var(--radius-full); }
 .shadow { box-shadow: var(--shadow-md); }
 
-/* Message Actions Styles for Edit and Delete */
 .message-actions {
   position: relative;
   display: inline-block;
@@ -1145,7 +1140,6 @@ input:focus, textarea:focus {
   font-style: italic;
 }
 
-/* Adjust message footer for edit/delete actions */
 .message-footer {
   display: flex;
   align-items: center;

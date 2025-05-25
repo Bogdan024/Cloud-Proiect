@@ -7,7 +7,5 @@ export const defaultRecordValues = {
 
 export const MAX_MEMORY = 3;
 
-// utils/constants.js
 export const USERS_COLLECTION = "users";
 export const MESSAGES_COLLECTION = "messages";
-// ... any other existing constants

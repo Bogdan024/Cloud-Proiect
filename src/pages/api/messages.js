@@ -1,4 +1,3 @@
-// pages/api/messages.js
 import { ObjectId } from "mongodb";
 import { sendMethodNotAllowed, sendOk } from "../../../utils/apiMethods";
 import { MESSAGES_COLLECTION } from "../../../utils/constants";
@@ -13,7 +12,6 @@ export default async function handler(req, res) {
     
     switch (method) {
       case "GET":
-        // Get messages between two users
         if (!query.senderId || !query.receiverId) {
           return res.status(400).json({ message: "senderId and receiverId are required" });
         }
@@ -25,7 +23,6 @@ export default async function handler(req, res) {
           ]
         }).sort({ timestamp: 1 }).toArray();
         
-        // Convert ObjectId to string
         result = result.map(message => ({
           ...message,
           _id: message._id.toString()
@@ -33,7 +30,6 @@ export default async function handler(req, res) {
         break;
         
       case "PATCH":
-        // Mark messages as read
         if (!body.senderId || !body.receiverId) {
           return res.status(400).json({ message: "senderId and receiverId are required" });
         }

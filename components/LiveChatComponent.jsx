@@ -1,4 +1,3 @@
-// components/LiveChatComponent.js
 import React, { useState, useEffect, useRef } from 'react';
 import MessageActions from './MessageActions';
 import {
@@ -29,7 +28,6 @@ const LiveChatComponent = () => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // Initialize user data and socket.io connection once
   useEffect(() => {
     const initChat = async () => {
       const storedUser = localStorage.getItem('user');
@@ -144,7 +142,6 @@ socket.on('message_deleted', ({ messageId }) => {
     };
   }, []);
 
-  // Load messages when selecting a user to
   useEffect(() => {
     if (!selectedUser || !user) return;
     selectedUserRef.current = selectedUser;
@@ -166,7 +163,7 @@ socket.on('message_deleted', ({ messageId }) => {
     fetchMessages();
   }, [selectedUser, user]);
 
-  // Scroll to bottom on new messages
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -334,7 +331,6 @@ socket.on('message_deleted', ({ messageId }) => {
                       <div className="message-content">{m.content} </div>
                       <div className="message-time">
                         {m.isEdited ? (
-    // If the message was edited, show "Edited" and the updated time
                           <>
                             Edited {new Date(m.updatedAt || m.timestamp).toLocaleTimeString([], {
                               hour: '2-digit',
@@ -347,7 +343,6 @@ socket.on('message_deleted', ({ messageId }) => {
                             )}
                           </>
                         ) : (
-                          // If not edited, show the original timestamp
                           <>
                             {new Date(m.timestamp).toLocaleTimeString([], {
                               hour: '2-digit',
