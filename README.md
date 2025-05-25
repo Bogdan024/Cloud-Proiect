@@ -4,7 +4,9 @@ Custura Bogdan-Petrisor
 Grupa 1132
 
 Link video: https://www.youtube.com/watch?v=jzokqOz-jOs
+
 Link site publicat: http://51.21.165.154/liveChat
+
 Link proiect Github: https://github.com/Bogdan024/Cloud-Proiect 
 
 Introducere
