@@ -55,14 +55,23 @@ Instanta EC2 si Git Bash cu comenzile din Docker pentru deploy
 Referinte:
 
  Socket.IO – Comunicare bidirecțională în timp real între client și server:
+ 
 https://socket.io/docs/v4/
+
  JSON Web Token (JWT) – Autentificare și transmitere sigură a informațiilor:
+ 
 https://jwt.io/introduction
+
  MongoDB – Bază de date NoSQL orientată pe documente:
+ 
 https://www.mongodb.com/docs/
+
 Amazon EC2 (Elastic Compute Cloud) – Serviciu AWS pentru capacitate de calcul scalabilă:
+
 https://docs.aws.amazon.com/ec2/
+
 Next.js – Framework React pentru aplicații web full-stack:
+
 https://nextjs.org/docs
 
 
