@@ -110,6 +110,7 @@ const LiveChatComponent = () => {
     )
   );
 });
+
 socket.on('message_deleted', ({ messageId }) => {
   setMessages(prev => prev.filter(m => m._id !== messageId));
 });
@@ -326,6 +327,7 @@ socket.on('message_deleted', ({ messageId }) => {
                             setMessages((prev) => prev.filter((msg) => msg._id !== deletedId));
                             setSelectedMessage(null);
                           }}
+                          socket={socketRef.current}
                         />
                       )}
                       <div className="message-content">{m.content} </div>

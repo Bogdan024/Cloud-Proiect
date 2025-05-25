@@ -143,6 +143,92 @@ export default function SocketHandler(req, res) {
         receiverSocket.emit('typing', { senderId });
       }
     });
+
+    socket.on('message_edited', ({ messageId, newContent, updatedAt }) => {
+  // Broadcast to everyone except the sender
+  socket.broadcast.emit('message_edited', {
+    messageId,
+    newContent,
+    updatedAt: new Date(updatedAt),
+  });
+});
+
+
+    socket.on('edit_message', async ({ messageId, newContent, userId }) => {
+  try {
+    const messagesCollection = await getCollection(MESSAGES_COLLECTION);
+
+    const result = await messagesCollection.findOneAndUpdate(
+      { _id: new ObjectId(messageId), senderId: userId },
+      { $set: { content: newContent, updatedAt: new Date(), isEdited: true } },
+      { returnDocument: 'after' }
+    );
+
+    if (!result.value) {
+      socket.emit('error', { message: 'Message not found or unauthorized' });
+      return;
+    }
+
+    const updatedMessage = {
+      ...result.value,
+      _id: result.value._id.toString()
+    };
+
+    // Notify sender
+    socket.emit('message_edited', {
+      messageId: updatedMessage._id,
+      newContent: updatedMessage.content,
+      updatedAt: updatedMessage.updatedAt
+    });
+
+    // Notify receiver (if online)
+    const receiverSocket = Array.from(io.sockets.sockets.values())
+      .find(s => s.userId === updatedMessage.receiverId);
+
+    if (receiverSocket) {
+      receiverSocket.emit('message_edited', {
+        messageId: updatedMessage._id,
+        newContent: updatedMessage.content,
+        updatedAt: updatedMessage.updatedAt
+      });
+    }
+
+  } catch (error) {
+    console.error('Edit message error:', error);
+    socket.emit('error', { message: 'Failed to edit message' });
+  }
+});
+
+socket.on('delete_message', async ({ messageId, userId }) => {
+  try {
+    const messagesCollection = await getCollection(MESSAGES_COLLECTION);
+
+    const message = await messagesCollection.findOne({ _id: new ObjectId(messageId) });
+
+    if (!message || message.senderId !== userId) {
+      socket.emit('error', { message: 'Message not found or unauthorized' });
+      return;
+    }
+
+    await messagesCollection.deleteOne({ _id: new ObjectId(messageId) });
+
+    const senderSockets = Array.from(io.sockets.sockets.values()).filter(
+      s => s.userId === userId
+    );
+    senderSockets.forEach(s => s.emit('message_deleted', { messageId }));
+    
+    const receiverSockets = Array.from(io.sockets.sockets.values()).filter(
+      s => s.userId === message.receiverId
+    );
+    receiverSockets.forEach(s => s.emit('message_deleted', { messageId }));
+
+  } catch (error) {
+    console.error('Delete message error:', error);
+    socket.emit('error', { message: 'Failed to delete message' });
+  }
+});
+
+
     
     socket.on('disconnect', async () => {
       console.log('Client disconnected', socket.id);

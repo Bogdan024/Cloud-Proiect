@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { editMessage, deleteMessage } from '../utils/messagesFunctions';
 
-const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUserId }) => {
+const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUserId, socket }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
@@ -25,6 +25,10 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+  console.log('Socket in MessageActions:', socket);
+}, [socket]);
   
   useEffect(() => {
     if (isEditing && editInputRef.current) {
@@ -63,6 +67,11 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
     
     try {
       const updatedMessage = await editMessage(message._id, editContent, currentUserId);
+      socket.emit('message_edited', {
+      messageId: message._id,
+      newContent: editContent,
+      updatedAt: new Date()
+    });
       setIsEditing(false);
       onMessageUpdated(updatedMessage);
     } catch (error) {
@@ -81,6 +90,10 @@ const MessageActions = ({ message, onMessageUpdated, onMessageDeleted, currentUs
       
       try {
         await deleteMessage(message._id, currentUserId);
+        socket.emit('delete_message', {
+        messageId: message._id,
+        userId: currentUserId
+      });
         onMessageDeleted(message._id);
       } catch (error) {
         setError('Failed to delete message. Please try again.');
